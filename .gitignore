@@ -1,0 +1,28 @@
+# Provenance record (references the source checkout) — intentionally untracked.
+PROVENANCE.md
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Training / eval outputs
+model_ckpt/
+wandb/
+slurm_logs/
+slurm-*.out
+eval_results*/
+*.log
+miopen_cache/
+
+# Large downloaded assets (placeholder READMEs stay tracked)
+checkpoints/*
+!checkpoints/README.md
+depth_extras/meta/*
+!depth_extras/meta/README.md
+dataset_meta_info/*
+!dataset_meta_info/README.md
+!dataset_meta_info/create_meta_info.py
+data/*
+!data/README.md

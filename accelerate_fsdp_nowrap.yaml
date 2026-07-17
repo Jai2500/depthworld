@@ -1,0 +1,38 @@
+compute_environment: LOCAL_MACHINE
+distributed_type: FSDP
+downcast_bf16: 'no'
+fsdp_config:
+  # NO_WRAP variant for single-modality CrtlWorld production.
+  #
+  # Why not SIZE_BASED_WRAP (per accelerate_fsdp.yaml): on LUMI standard-g we
+  # repeatedly hit silent NCCL channel-setup hangs during FSDP construction
+  # with SIZE_BASED_WRAP — every wrapped sub-unit does its own all-gather
+  # init, and any one flaky channel out of N stalls the whole job for the
+  # full NCCL watchdog window. Three consecutive RGB production submissions
+  # hung at `accelerator.prepare()` on three different node pairs
+  # (nid005148-49, nid005203-04, nid005241-42) before this NO_WRAP variant
+  # was used.
+  #
+  # Cost vs SIZE_BASED_WRAP: param all-gather is now one big op per forward
+  # instead of N small ones, so peak GCD mem goes up a bit (RGB at b=4 went
+  # 47.87 GB → ~52 GB extrapolated). Well under the 64 GB GCD limit; grad +
+  # optimizer-state sharding still happens (use_orig_params: true).
+  fsdp_auto_wrap_policy: NO_WRAP
+  fsdp_backward_prefetch: BACKWARD_PRE
+  fsdp_cpu_ram_efficient_loading: true
+  fsdp_forward_prefetch: false
+  fsdp_offload_params: false
+  fsdp_sharding_strategy: FULL_SHARD
+  fsdp_state_dict_type: SHARDED_STATE_DICT
+  fsdp_sync_module_states: true
+  fsdp_use_orig_params: true
+machine_rank: 0
+main_training_function: main
+mixed_precision: bf16
+num_machines: 1
+num_processes: 8
+rdzv_backend: static
+same_network: true
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false
