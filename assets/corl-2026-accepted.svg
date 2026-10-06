@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="64" viewBox="0 0 520 64" role="img" aria-labelledby="title desc">
+  <title id="title">Accepted to CoRL 2026</title>
+  <desc id="desc">A celebratory purple-to-blue gradient banner announcing acceptance to CoRL 2026.</desc>
+  <defs>
+    <linearGradient id="text-gradient" x1="110" y1="0" x2="410" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6a11cb"/>
+      <stop offset="1" stop-color="#2575fc"/>
+    </linearGradient>
+  </defs>
+  <text x="260" y="43" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800" letter-spacing="0.3">
+    <tspan>🎉 </tspan><tspan fill="url(#text-gradient)">Accepted to CoRL 2026</tspan><tspan> 🎉</tspan>
+  </text>
+</svg>

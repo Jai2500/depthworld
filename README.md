@@ -1,9 +1,19 @@
-# DepthWorld: 3D World Model for Robot Manipulation
+<div align="center">
+<h2>DepthWorld: 3D World Model for Robot Manipulation</h2>
 
-[![Project Page](https://img.shields.io/badge/Project-Page-blue)](https://jaibardhan.com/depthworld/)
-[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Checkpoints-jaibrdhn%2Fdepthworld-yellow)](https://huggingface.co/jaibrdhn/depthworld)
-[![CoRL 2026](https://img.shields.io/badge/CoRL-2026-green)](https://jaibardhan.com/depthworld/)
-[![ArXiv](https://img.shields.io/badge/ArXiv-coming_soon-red)](https://jaibardhan.com/depthworld/)
+**Jai Bardhan, Josef Šivic, Vladimír Petrík**
+
+Czech Institute of Informatics, Robotics and Cybernetics (CIIRC), Czech Technical University in Prague
+
+<a href='https://jaibardhan.com/depthworld/'><img src='https://img.shields.io/badge/Project-Page-green'></a>
+<a href='https://jaibardhan.com/depthworld/'><img src='https://img.shields.io/badge/ArXiv-coming_soon-red'></a>
+<a href='https://huggingface.co/jaibrdhn/depthworld'><img src='https://img.shields.io/badge/%F0%9F%A4%97-Checkpoints-yellow'></a>
+<a href='https://huggingface.co/datasets/jaibrdhn/droid_3d_extrinsics'><img src='https://img.shields.io/badge/%F0%9F%A4%97-DROID--3D_Extrinsics-yellow'></a>
+<a href='https://forms.gle/E84Kg4BedVpgMe436'><img src='https://img.shields.io/badge/DROID--3D-Access_Form-blue'></a>
+
+<img src="assets/corl-2026-accepted.svg" alt="🎉 Accepted to CoRL 2026 🎉" width="520"/>
+
+</div>
 
 Action-conditioned RGB+depth video world model for DROID-style robot
 manipulation, built on Stable Video Diffusion. Given a short history of
