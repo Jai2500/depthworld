@@ -100,8 +100,8 @@ class Action_encoder2(nn.Module):
         action = self.action_encode(action)
 
         if texts is not None and self.text_cond:
-            # WARN: The 50% prob doesn't seem to be encoded here??
-            # with 50% probability, add text condition
+            # The text condition is always added when texts are given (no
+            # random text dropout).
             with torch.no_grad():
                 inputs = text_tokinizer(
                     texts, padding="max_length", return_tensors="pt", truncation=True
@@ -126,13 +126,10 @@ class CrtlWorld(nn.Module):
         )
 
         # load from pretrained stable video diffusion
-        # NOTE: This is what would be replaced by WanPipeline
         self.pipeline = StableVideoDiffusionPipeline.from_pretrained(
             args.pretrained_model_path
         )
-        # repalce the unet to support frame_level pose condition
-        # NOTE: Does WAN use a UNet architecture? Probably not right?
-        # NOTE: In this case we would need to change it to support DiT
+        # replace the unet to support frame_level pose condition
         print("replace the unet to support action condition and frame_level pose!")
         unet = UNetSpatioTemporalConditionModel()
         unet.load_state_dict(self.pipeline.unet.state_dict(), strict=False)

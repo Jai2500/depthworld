@@ -5,9 +5,10 @@ git. External models come from Hugging Face:
 
 ```bash
 pip install -U "huggingface_hub[cli]"
-hf auth login   # SVD is gated: accept the license on its model page first
+hf auth login   # needed for gated repos (e.g. the DROID-3D calibration dataset)
 
-hf download stabilityai/stable-video-diffusion-img2vid \
+# --exclude skips the unused ~19 GB original-format svd*.safetensors files
+hf download stabilityai/stable-video-diffusion-img2vid --exclude "svd*" \
     --local-dir checkpoints/stable-video-diffusion-img2vid
 hf download openai/clip-vit-base-patch32 \
     --local-dir checkpoints/clip-vit-base-patch32
@@ -28,7 +29,7 @@ checkpoints/
                                     #   env: CTRLWORLD_CLIP_MODEL_PATH, flag: --clip_model_path
   vggt/model.pt                     # facebook/VGGT-1B — DPT point-head warm-start
                                     #   env: CTRLWORLD_VGGT_CKPT, flag: --pointmap_vggt_ckpt
-  horiz_40k_merged.pt               # (example) consolidated horiz checkpoint used as the
+  horiz_40k_merged.pt               # (example, not released) consolidated horiz checkpoint used as the
                                     #   warm-start for pointmap training
                                     #   env: CTRLWORLD_WARM_START_UNET_CKPT
 ```

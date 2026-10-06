@@ -1,5 +1,5 @@
 """Per-episode camera extrinsics from the joint-factor-graph (JFG)
-calibration, loaded from `dataset_meta_info/droid_raw_ctrl/extrinsics.jsonl`.
+calibration, loaded from `depth_extras/meta/extrinsics.jsonl`.
 
 Each record carries:
 
@@ -7,7 +7,9 @@ Each record carries:
   historical field names:
     T0_ext1_in_world          : ext1 left-camera view matrix
     T1_ext2_in_world          : ext2 left-camera view matrix
-    T_w2w_scene_correction    : per-scene world correction (typically near I)
+    T_w2w_scene_correction    : per-scene world correction (typically near I;
+                                absent from the released extrinsics.jsonl,
+                                treated as I)
 
   Per-robot (applies to every episode for that robot_serial):
     dT_gw_gripper_in_world_correction  : 4×4 small correction to analytic FK
@@ -102,7 +104,10 @@ def get_per_robot_corrections(rec: dict) -> tuple[torch.Tensor, torch.Tensor]:
 
 
 def get_scene_world_correction(rec: dict) -> torch.Tensor:
-    """Return T_w2w — the 4×4 per-scene world correction (typically near I)."""
+    """Return T_w2w — the 4×4 per-scene world correction (typically near I).
+    The released extrinsics.jsonl does not carry it; identity is returned then."""
+    if "T_w2w_scene_correction" not in rec:
+        return torch.eye(4)
     return torch.tensor(rec["T_w2w_scene_correction"], dtype=torch.float32)
 
 
@@ -336,7 +341,7 @@ def smoke_test(
 
 
 def smoke_test_wrist_pose(
-    dataset_root: str | Path = "dataset_example/droid_raw_ctrl",
+    dataset_root: str | Path = "data/droid_raw_ctrl",
     extrinsics_jsonl: str | Path = _PKG_META / "extrinsics.jsonl",
     gripper2wrist_asset: str | Path = DEFAULT_GRIPPER2WRIST_ASSET,
 ) -> None:

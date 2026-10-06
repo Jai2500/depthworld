@@ -2,6 +2,7 @@
 
 [![Project Page](https://img.shields.io/badge/Project-Page-blue)](https://jaibardhan.com/depthworld/)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Checkpoints-jaibrdhn%2Fdepthworld-yellow)](https://huggingface.co/jaibrdhn/depthworld)
+[![CoRL 2026](https://img.shields.io/badge/CoRL-2026-green)](https://jaibardhan.com/depthworld/)
 [![ArXiv](https://img.shields.io/badge/ArXiv-coming_soon-red)](https://jaibardhan.com/depthworld/)
 
 Action-conditioned RGB+depth video world model for DROID-style robot
@@ -75,6 +76,8 @@ contents.
 
 ## Setup
 
+Requires Python ≥ 3.10. All code was tested on NVIDIA H200 GPUs.
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -85,10 +88,11 @@ All external models are downloaded from Hugging Face:
 
 ```bash
 pip install -U "huggingface_hub[cli]"
-hf auth login   # SVD is gated: accept the license on its model page first
+hf auth login   # needed for gated repos (e.g. the DROID-3D calibration dataset)
 
-# SVD UNet + VAE + image encoder (required)
-hf download stabilityai/stable-video-diffusion-img2vid \
+# SVD UNet + VAE + image encoder (required). --exclude skips the ~19 GB
+# original-format svd*.safetensors files, which the diffusers loader never reads.
+hf download stabilityai/stable-video-diffusion-img2vid --exclude "svd*" \
     --local-dir checkpoints/stable-video-diffusion-img2vid
 # CLIP text/image encoder for action conditioning (required)
 hf download openai/clip-vit-base-patch32 \
@@ -100,8 +104,7 @@ hf download facebook/VGGT-1B model.pt --local-dir checkpoints/vggt
 ### depthworld-trained checkpoints
 
 Consolidated 90k-step EMA `.pt` checkpoints trained with this repo, hosted
-at [jaibrdhn/depthworld](https://huggingface.co/jaibrdhn/depthworld)
-(currently private — request access):
+at [jaibrdhn/depthworld](https://huggingface.co/jaibrdhn/depthworld):
 
 ```bash
 # horiz (RGB+depth, no pointmap head)
@@ -131,6 +134,13 @@ downloaded from
 
 ## Training
 
+Training logs to [Weights & Biases](https://wandb.ai): run `wandb login`
+first, or set `WANDB_MODE=offline` to keep logs local.
+
+Both accelerate configs launch 8 processes (one per GPU) on a single node;
+pass `--num_processes N` to `accelerate launch` to use a different number
+of GPUs.
+
 ### Horiz (no pointmap head)
 
 ```bash
@@ -157,7 +167,7 @@ accelerate launch --config_file accelerate_fsdp_nowrap.yaml \
     --pointmap_loss_weight 0.005 \
     --dataset_class rgb_depth_horiz --width 640 \
     --dataset_root_path data --dataset_meta_info_path dataset_meta_info \
-    --dataset_names "" --dataset_cfgs droid_raw_ctrl \
+    --dataset_names droid_raw_ctrl --dataset_cfgs droid_raw_ctrl \
     --no_ckpt --mixed_precision bf16 --use_ema \
     --train_batch_size 1 --max_train_steps 100000 \
     --tag horiz_pm_dpt_vggt
@@ -165,6 +175,12 @@ accelerate launch --config_file accelerate_fsdp_nowrap.yaml \
 
 Notes:
 
+- `horiz_40k_merged.pt` is not released. The released DPT checkpoint was
+  warm-started from a 40k-step horiz checkpoint; to reproduce that recipe,
+  train horiz to 40k and consolidate it (see [Evaluation](#evaluation)).
+  Alternatively, warm-start from the released `checkpoints/horiz_90k_ema.pt`
+  (this differs from the released recipe). `CTRLWORLD_WARM_START_STEP` only
+  sets the starting step counter, so `--max_train_steps` counts from it.
 - `--pointmap_dpt_init {random,vggt}` picks the head initialization; `vggt`
   copies VGGT's direct XYZ+confidence point head. The latent stem always
   trains from scratch.
@@ -202,7 +218,8 @@ L1 / log-L1):
 python scripts/eval_horiz_chunk.py \
     --ckpt_path model_ckpt/<tag>/checkpoint-<step>_merged.pt \
     --width 640 --dataset_root_path data \
-    --dataset_meta_info_path dataset_meta_info --dataset_cfgs droid_raw_ctrl \
+    --dataset_meta_info_path dataset_meta_info \
+    --dataset_names droid_raw_ctrl --dataset_cfgs droid_raw_ctrl \
     --num_val_samples 30 --output_dir eval_results_chunk
 ```
 
@@ -213,7 +230,8 @@ visual history; per-frame metric curves):
 python scripts/eval_horiz_rollout.py \
     --ckpt_path model_ckpt/<tag>/checkpoint-<step>_merged.pt \
     --width 640 --dataset_root_path data \
-    --dataset_meta_info_path dataset_meta_info --dataset_cfgs droid_raw_ctrl \
+    --dataset_meta_info_path dataset_meta_info \
+    --dataset_names droid_raw_ctrl --dataset_cfgs droid_raw_ctrl \
     --interact_num 10 --num_val_samples 20 --output_dir eval_results_rollout
 ```
 
@@ -245,11 +263,19 @@ The dataset is built from the raw DROID release (download per the official
 DROID instructions, e.g. `gsutil -m cp -r gs://gresearch/robotics/droid_raw/1.0.1 ...`),
 with precomputed S2M2 stereo disparity per camera placed next to each
 episode's recordings (`recordings/s2m2_v2/<serial>/stereo_s2m2.npz`).
+These precomputed depths are part of DROID-3D and are shared on request:
+complete the
+[DROID-3D Access Request Form](https://forms.gle/E84Kg4BedVpgMe436), which
+has the instructions for downloading and placing them. Episodes without them
+are skipped by the indexing step below.
 
 The optimized DROID-3D camera calibration (per-episode intrinsics +
 factor-graph-optimized extrinsics, needed for pointmap training and
 depth/pointmap eval) is hosted at
-[jaibrdhn/droid_3d_extrinsics](https://huggingface.co/datasets/jaibrdhn/droid_3d_extrinsics):
+[jaibrdhn/droid_3d_extrinsics](https://huggingface.co/datasets/jaibrdhn/droid_3d_extrinsics).
+Access is granted after approval through the same
+[access form](https://forms.gle/E84Kg4BedVpgMe436); the email you enter in
+the form must match the email of your Hugging Face account.
 
 ![DROID-3D calibration pipeline](assets/droid3d_pipeline.png)
 
@@ -270,6 +296,34 @@ viser) — a minimal reference for consuming it.
        --raw_root /path/to/droid_raw/1.0.1 \
        --output dataset_meta_info/droid_raw_ctrl/raw_index.jsonl
    ```
+
+   > ⚠️ **Check that your `traj_id`s match ours.** The code looks up the
+   > released calibration by `traj_id`, which is each episode's position in
+   > the uuid-sorted list of episodes that pass this step's checks. Your IDs
+   > only match ours if your index contains exactly the same episodes: a
+   > partial download, missing depth files, or episodes dropped by the
+   > per-episode timeout on slow storage shift every later ID, and episodes
+   > then silently get another episode's calibration. After this step, run:
+   >
+   > ```bash
+   > python - <<'EOF'
+   > import json
+   > idx = {}
+   > for line in open("dataset_meta_info/droid_raw_ctrl/raw_index.jsonl"):
+   >     r = json.loads(line)
+   >     if "traj_id" in r:
+   >         idx[r["traj_id"]] = r["episode_uuid"]
+   > for name in ("camera_intrinsics", "extrinsics"):
+   >     bad = 0
+   >     for line in open(f"depth_extras/meta/{name}.jsonl"):
+   >         r = json.loads(line)
+   >         bad += r["traj_id"] in idx and idx[r["traj_id"]] != r["episode_uuid"]
+   >     print(f"{name}: {bad} mismatched traj_ids")
+   > EOF
+   > ```
+   >
+   > Both counts should be 0. If not, the pointmap training targets and the
+   > depth/pointmap eval metrics will be wrong; please open a GitHub issue.
 
 2. **Extract RGB + depth SVD latents** and per-episode annotation JSONs
    (shard across GPUs with `--num_workers N --worker_idx i`, one launch per
@@ -308,7 +362,7 @@ See `data/README.md` for the expected on-disk layout and
 @inproceedings{bardhan2026depthworld,
   title     = {DepthWorld: 3D World Model for Robot Manipulation},
   author    = {Bardhan, Jai and \v{S}ivic, Josef and Petr\'{i}k, Vladim\'{i}r},
-  booktitle = {ArXiv Preprint},
+  booktitle = {Conference on Robot Learning (CoRL)},
   year      = {2026}
 }
 ```

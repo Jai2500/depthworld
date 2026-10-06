@@ -1,19 +1,7 @@
 compute_environment: LOCAL_MACHINE
-# Plain DDP (no parameter sharding) for NFT post-training.
-#
-# NFT (scripts/train_nft_wm.py) is built for DDP, not FSDP: it configures
-# DistributedDataParallelKwargs (find_unused_parameters=False), prepares only
-# model.unet/action_encoder, and then sets
-#   model.pipeline.unet = accelerator.unwrap_model(unet_ddp)
-# so its in-loop sampling calls the unet submodule directly. That only works
-# when params are NOT sharded -- under FSDP the unwrapped unet still has
-# flattened/sharded params and sampling dies with "mat2 must be a matrix, got
-# 1-D tensor" in time_embedding.linear_1.
-#
-# The horiz CrtlWorld is small enough (~6 GB params in bf16) to replicate on a
-# single H200 (141 GB) with room for group rollouts + the reference forward +
-# reward, so no sharding is needed. The FSDP NO_WRAP config was a LUMI/AMD
-# Slingshot fabric workaround and does not apply on the NVIDIA H200 cluster.
+# Plain DDP (no parameter sharding): the full model is replicated on every
+# GPU. Alternative to accelerate_fsdp_nowrap.yaml, which the README commands
+# use. num_processes is the GPU count (override with --num_processes).
 distributed_type: MULTI_GPU
 downcast_bf16: 'no'
 gpu_ids: all

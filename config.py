@@ -24,8 +24,8 @@ class wm_args:
 
     # dataset parameters
     # raw data
-    dataset_root_path = "dataset_example"
-    dataset_names = "droid_subset"
+    dataset_root_path = "data"
+    dataset_names = "droid_raw_ctrl"
     split = "val"
     # meta info
     dataset_meta_info_path = "dataset_meta_info"
@@ -41,7 +41,7 @@ class wm_args:
 
     # logs parameters
     debug = False
-    tag = "doird_subset"
+    tag = "depthworld"
     output_dir = f"model_ckpt/{tag}"
     wandb_run_name = tag
     wandb_project_name = "droid_example"

@@ -52,9 +52,9 @@ def parse_args() -> argparse.Namespace:
         help="Override cfg.clip_model_path for the frozen CLIP text/tokenizer modules.",
     )
 
-    p.add_argument("--dataset_root_path", default="/")
+    p.add_argument("--dataset_root_path", default="data")
     p.add_argument("--dataset_meta_info_path", default="dataset_meta_info")
-    p.add_argument("--dataset_names", default="")
+    p.add_argument("--dataset_names", default="droid_raw_ctrl")
     p.add_argument("--dataset_cfgs", default="droid_raw_ctrl")
     p.add_argument("--annotation_name", default="annotation")
     p.add_argument(

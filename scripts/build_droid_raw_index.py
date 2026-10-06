@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Build a per-episode index for the raw DROID dataset.
 
-Walks /mnt/datasets/droid_raw/droid_raw/1.0.1/<LAB>/{success,failure}/<DATE>/<TS>/.
+Walks <raw_root>/<LAB>/{success,failure}/<DATE>/<TS>/.
 For each valid episode (has trajectory.h5, has recordings/s2m2_v2 with 3 cams,
 has 3 MP4s, has parseable metadata_*.json), emit one JSONL row containing
 everything the latent extractor needs:
@@ -27,8 +27,9 @@ import time
 from multiprocessing import Pool
 from pathlib import Path
 
-RAW_ROOT = "/mnt/datasets/droid_raw/droid_raw/1.0.1"
-AGG_ANN_PATH = os.path.join(RAW_ROOT, "aggregated-annotations-030724.json")
+# Set from --raw_root in main().
+RAW_ROOT = None
+AGG_ANN_PATH = None
 LABS = [
     "AUTOLab", "CLVR", "GuptaLab", "ILIAD", "IPRL", "IRIS",
     "PennPAL", "RAD", "RAIL", "REAL", "RPL", "TRI", "WEIRD",
@@ -170,7 +171,7 @@ def _atomic_write(payload_str, output_path):
 def main():
     global RAW_ROOT, AGG_ANN_PATH
     ap = argparse.ArgumentParser()
-    ap.add_argument("--raw_root", type=str, default=RAW_ROOT,
+    ap.add_argument("--raw_root", type=str, required=True,
                     help="root of the raw DROID download "
                          "(<raw_root>/<LAB>/{success,failure}/<DATE>/<TS>/)")
     ap.add_argument("--num_workers", type=int,

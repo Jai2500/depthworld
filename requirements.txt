@@ -13,3 +13,4 @@ pandas
 lpips
 scikit-image
 safetensors
+h5py
