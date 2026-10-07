@@ -6,7 +6,7 @@
 Czech Institute of Informatics, Robotics and Cybernetics (CIIRC), Czech Technical University in Prague
 
 <a href='https://jaibardhan.com/depthworld/'><img src='https://img.shields.io/badge/Project-Page-green'></a>
-<a href='https://jaibardhan.com/depthworld/'><img src='https://img.shields.io/badge/ArXiv-coming_soon-red'></a>
+<a href='https://arxiv.org/abs/2610.08780'><img src='https://img.shields.io/badge/ArXiv-2610.08780-red'></a>
 <a href='https://huggingface.co/jaibrdhn/depthworld'><img src='https://img.shields.io/badge/%F0%9F%A4%97-Checkpoints-yellow'></a>
 <a href='https://huggingface.co/datasets/jaibrdhn/droid_3d_extrinsics'><img src='https://img.shields.io/badge/%F0%9F%A4%97-DROID--3D_Extrinsics-yellow'></a>
 <a href='https://forms.gle/E84Kg4BedVpgMe436'><img src='https://img.shields.io/badge/DROID--3D-Access_Form-blue'></a>
@@ -387,6 +387,18 @@ following [MapAnything](https://github.com/facebookresearch/map-anything).
 Trained on the [DROID](https://droid-dataset.github.io/) dataset. The
 gripper2wrist transformations (`depth_extras/assets/gripper2wrist_transforms.json`) 
 is taken from [PointWorld](https://point-world.github.io/).
+
+This work was supported by the European Union's Horizon Europe projects
+AGIMUS (No. 101070165), euROBIN (No. 101070596), ERC FRONTIER (No.
+101097822), ELIAS (No. 101120237), ELLIOT (No. 101214398), ČVUT Starting
+grant "DREAM-ACT" (Project ID CVUT-StG-26-089), and CTU Future Fund (Project
+ID: CVUT-BrF-26-22825M). This work was also supported by the EU’s Horizon
+Europe Programme under the Grant agreement No. 101136607 (CLARA Project),
+and was co-funded by the EU from the Operational Programme Jan Amos Komenský
+(OP JAK) (project "Center for Artificial Intelligence and Quantum Computing
+in System Brain Research", reg. no. CZ.02.01.01/00/23_029/0008437). Compute
+resources and infrastructure were supported by the Ministry of Education,
+Youth and Sports of the Czech Republic through the e-INFRA CZ (ID:90254).
 
 Code is released under the MIT license (`LICENSE.txt`). The released
 checkpoints are fine-tuned from SVD and remain subject to the Stability AI
